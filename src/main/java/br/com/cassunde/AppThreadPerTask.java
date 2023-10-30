@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
@@ -18,7 +17,7 @@ public class AppThreadPerTask {
 
     private static final Logger logger = LoggerFactory.getLogger(AppThreadPerTask.class);
 
-    public static void main(String[] args) throws IOException, InterruptedException, ExecutionException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
 
         Instant start = Instant.now();
 
@@ -36,20 +35,19 @@ public class AppThreadPerTask {
         logger.info("end");
     }
 
-    private static String startVirtualThreads() throws IOException, InterruptedException, ExecutionException {
+    private static String startVirtualThreads() throws InterruptedException, ExecutionException {
 
         try(var executor = Executors.newVirtualThreadPerTaskExecutor()){
 
             var task1 = executor.submit(AppThreadPerTask::executeTask1);
             var task2 = executor.submit(AppThreadPerTask::executeTask2);
 
-            return "";
+            return task1.get() + task2.get();
         }
     }
 
-    private static String startTraditionalThreadsOld() throws InterruptedException {
+    private static String startTraditionalThreadsOld() throws Exception {
         System.out.println(Thread.currentThread());
-        String task1 = executeTask1();
         String task2 = executeTask2();
         return task1+task2;
     }
@@ -60,9 +58,14 @@ public class AppThreadPerTask {
 
         return "task2";
     }
-    private static String executeTask1() throws InterruptedException {
+    private static String executeTask1() throws Exception {
         logger.info("task 1");
         Thread.sleep(5000);
+
+        if(true){
+            throw new Exception("rapido");
+        }
+
         return "task1";
     }
 }
